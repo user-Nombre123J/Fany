@@ -20,7 +20,7 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/user-
 
 local window = library:AddWindow(title, {
     main_color = Color3.fromRGB(255, 180, 220),
-    min_size = Vector2.new(580, 800),
+    min_size = Vector2.new(580, 850),
     can_resize = true,
 })
 local AutoFarm = window:AddTab("Farm FASH")
