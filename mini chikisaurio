@@ -23,7 +23,7 @@ local window = library:AddWindow(title, {
     min_size = Vector2.new(580, 800),
     can_resize = true,
 })
-local AutoFarm = window:AddTab("Farm Op")
+local AutoFarm = window:AddTab("Farm FASH")
 
 
 getgenv()._AutoRepFarmEnabled = false  
@@ -167,7 +167,7 @@ local startTime = tick()
 
 -- GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "AntiAFK_Johanx7_12"
+gui.Name = "Anti AFK BY Fany"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
@@ -186,7 +186,7 @@ corner.CornerRadius = UDim.new(0, 14)
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, -30, 0, 30)
 title.BackgroundTransparency = 1
-title.Text = "Anti AFK by Johanx7_12"
+title.Text = "Anti AFK by Fany"
 title.TextColor3 = Color3.fromRGB(255, 80, 80)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
@@ -490,176 +490,6 @@ AutoFarm:AddButton("Jungle lift", function()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
 end)
 
-local MusicTab = window:AddTab("Music")
-
-local MP3_URL = ""
-local Playlist = {}
-local currentIndex = 0
-local isPaused = false
-local fileName = "GenesisPlaylist_"..player.Name..".txt"
-local tempIndex = 0
-local currentSound = nil
-
-if isfile(fileName) then
-	local data = readfile(fileName)
-	for url in string.gmatch(data, "[^,]+") do
-		table.insert(Playlist, url)
-	end
-else
-	writefile(fileName, "")
-end
-
-local function savePlaylist()
-	writefile(fileName, table.concat(Playlist, ","))
-end
-
-local function formatTime(sec)
-	sec = math.floor(sec or 0)
-	local m = math.floor(sec / 60)
-	local s = sec % 60
-	return string.format("%02d:%02d", m, s)
-end
-
-local TimeLabel = MusicTab:AddLabel("⏱️ 00:00 / 00:00")
-
-local function loadMP3(url)
-	if url == "" then return end
-	tempIndex = tempIndex + 1
-	local tempFile = "GenesisMusic_"..tempIndex..".mp3"
-
-	pcall(function()
-		if isfile(tempFile) then delfile(tempFile) end
-		writefile(tempFile, game:HttpGet(url))
-	end)
-
-	if currentSound then
-		currentSound:Destroy()
-	end
-
-	currentSound = Instance.new("Sound")
-	currentSound.Name = "GenesisMP3Sound"
-	currentSound.Parent = SoundService
-	currentSound.SoundId = getcustomasset(tempFile)
-	currentSound.Volume = 1
-	currentSound.Looped = false
-	currentSound:Play()
-	isPaused = false
-
-	currentSound.Ended:Connect(function()
-		if not currentSound.Looped and not isPaused then
-			currentIndex = currentIndex + 1
-			if currentIndex > #Playlist then currentIndex = 1 end
-			loadMP3(Playlist[currentIndex])
-		end
-	end)
-end
-
-task.spawn(function()
-	while task.wait(0.1) do
-		if currentSound and currentSound:IsDescendantOf(SoundService) and currentSound.IsLoaded then
-			TimeLabel.Text = "⏱️ " .. formatTime(currentSound.TimePosition) .. " / " .. formatTime(currentSound.TimeLength)
-
-			if not currentSound.IsPlaying and not isPaused and currentSound.TimePosition > 0 and currentSound.TimePosition >= currentSound.TimeLength - 0.2 then
-				currentIndex = currentIndex + 1
-				if currentIndex > #Playlist then currentIndex = 1 end
-				loadMP3(Playlist[currentIndex])
-			end
-		end
-	end
-end)
-
-MusicTab:AddTextBox(" MP3 URL", function(val)
-	MP3_URL = val
-end, {["clear"] = false})
-
-MusicTab:AddButton("Play", function()
-	if MP3_URL ~= "" then
-		loadMP3(MP3_URL)
-	end
-end)
-
-MusicTab:AddButton("Continue", function()
-	if currentSound then
-		if isPaused then
-			isPaused = false
-			currentSound:Resume()
-		else
-			currentSound:Play()
-		end
-	end
-end)
-
-MusicTab:AddButton("Pause", function()
-	if currentSound and currentSound.IsPlaying then
-		currentSound:Pause()
-		isPaused = true
-	end
-end)
-
-MusicTab:AddButton("Stop", function()
-	if currentSound then
-		currentSound:Stop()
-		isPaused = false
-	end
-end)
-
-MusicTab:AddTextBox("Volumen (0-5)", function(val)
-	if currentSound then
-		local num = tonumber(val)
-		if num then
-			currentSound.Volume = math.clamp(num, 0, 5)
-		end
-	end
-end, {["clear"] = false})
-
-MusicTab:AddButton("Toggle Loop", function()
-	if currentSound then
-		currentSound.Looped = not currentSound.Looped
-	end
-end)
-
-MusicTab:AddButton("Add to Playlist", function()
-	if MP3_URL ~= "" then
-		tempIndex = tempIndex + 1
-		local tempFile = "GenesisMusic_"..tempIndex..".mp3"
-		pcall(function()
-			if isfile(tempFile) then delfile(tempFile) end
-			writefile(tempFile, game:HttpGet(MP3_URL))
-		end)
-		table.insert(Playlist, MP3_URL)
-		savePlaylist()
-	end
-end)
-
-MusicTab:AddButton("Play Playlist", function()
-	if #Playlist > 0 then
-		currentIndex = 1
-		loadMP3(Playlist[currentIndex])
-	end
-end)
-
-MusicTab:AddButton("Next", function()
-	if #Playlist > 0 then
-		currentIndex = currentIndex + 1
-		if currentIndex > #Playlist then currentIndex = 1 end
-		loadMP3(Playlist[currentIndex])
-	end
-end)
-
-MusicTab:AddButton("Previous", function()
-	if #Playlist > 0 then
-		currentIndex = currentIndex - 1
-		if currentIndex < 1 then currentIndex = #Playlist end
-		loadMP3(Playlist[currentIndex])
-	end
-end)
-
-MusicTab:AddButton("Clear Playlist", function()
-	Playlist = {}
-	savePlaylist()
-	currentIndex = 0
-end)
-
 local features = window:AddTab("Calculate Stats")
 features:Show()
 
@@ -785,6 +615,164 @@ task.spawn(function()
     end
 end)
 
+local estadisticas = window:AddTab("Stats")
+local SelectPlayerName = ""
+
+local PlayerDrop = estadisticas:AddDropdown("Select Player", function(Value)
+    SelectPlayerName = Value:match("| (.+)")
+end)
+
+for _, Plr in pairs(game.Players:GetPlayers()) do
+    PlayerDrop:Add(Plr.DisplayName .. " | " .. Plr.Name)
+end
+
+game.Players.PlayerAdded:Connect(function(Plr)
+    PlayerDrop:Add(Plr.DisplayName .. " | " .. Plr.Name)
+end)
+
+local function FormatNumberWithCommas(number)
+    return tostring(number):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+end
+
+local function FormatAbbreviated(number)
+    local abbr = {"", "K", "M", "B", "T", "Qa", "Qi"}
+    local idx = 1
+    while number >= 1000 and idx < #abbr do
+        number = number / 1000
+        idx += 1
+    end
+    return string.format("%.2f", number) .. abbr[idx]
+end
+
+local function FormatDisplay(value)
+    return "[ " .. FormatNumberWithCommas(value) .. " | " .. FormatAbbreviated(value) .. " ]"
+end
+
+local Update = estadisticas:AddLabel("")
+local Update1 = estadisticas:AddLabel("")
+local Update2 = estadisticas:AddLabel("")
+local Update3 = estadisticas:AddLabel("")
+local Update4 = estadisticas:AddLabel("")
+local Update5 = estadisticas:AddLabel("")
+local Update6 = estadisticas:AddLabel("")
+local Update9 = estadisticas:AddLabel("")
+local Update10 = estadisticas:AddLabel("")
+local Update11 = estadisticas:AddLabel("")
+local Update12 = estadisticas:AddLabel("")
+local Update13 = estadisticas:AddLabel("")
+
+estadisticas:AddLabel("————————————————————————————")
+estadisticas:AddLabel("Stats Advanced").TextSize = 24
+
+local enemyHealthLabel = estadisticas:AddLabel("Enemy life: N/A")
+enemyHealthLabel.TextSize = 20
+enemyHealthLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local playerDamageLabel = estadisticas:AddLabel("Your damage: N/A")
+playerDamageLabel.TextSize = 20
+playerDamageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local hitsToKillLabel = estadisticas:AddLabel("Blows to kill him: N/A")
+hitsToKillLabel.TextSize = 20
+hitsToKillLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local wildWizardLabel = estadisticas:AddLabel("Wild Wizard equipped: 0 (0 bonus)")
+wildWizardLabel.TextSize = 18
+
+local function countEquipped(player, petName)
+    local equipped = player:FindFirstChild("equippedPets")
+    if not equipped then return 0 end
+    local count = 0
+    for _, slot in pairs(equipped:GetChildren()) do
+        if slot:FindFirstChild("petReference") and slot.petReference.Value then
+            local pet = slot.petReference.Value
+            if pet.Name == petName then
+                count += 1
+            end
+        end
+    end
+    return count
+end
+
+local function calculateLocalPlayerDamage()
+    local Player = game.Players.LocalPlayer
+    local strength = Player:FindFirstChild("leaderstats") and Player.leaderstats:FindFirstChild("Strength")
+    if not strength then return 0 end
+
+    local baseDamage = strength.Value * 0.1
+    local wildCount = countEquipped(Player, "Wild Wizard")
+    local wildBonus = wildCount * 0.33
+    wildWizardLabel.Text = "Wild Wizard equipped: "..wildCount.." ("..FormatDisplay(baseDamage*wildBonus).." bonus)"
+
+    return baseDamage * (1 + wildBonus)
+end
+
+local function calculateEnemyHealth(targetPlayer)
+    if not targetPlayer then return 0 end
+    local baseDura = targetPlayer:FindFirstChild("Durability") and targetPlayer.Durability.Value or 0
+    local ultFolder = targetPlayer:FindFirstChild("ultimatesFolder")
+    local multiplier = 1
+    if ultFolder and ultFolder:FindFirstChild("Infernal Health") then
+        multiplier = multiplier + 0.15 * ultFolder["Infernal Health"].Value
+    end
+    return baseDura * multiplier
+end
+
+local function calculateHitsToKill(health, damage)
+    if damage <= 0 then return "∞" end
+    local hits = math.ceil(health / damage)
+    return hits > 50 and "∞" or (hits < 1 and 1 or hits)
+end
+
+local function updateStats(targetPlayer)
+    if not targetPlayer then
+        Update.Text = "Strength: N/A"
+        Update1.Text = "Gems: N/A"
+        Update2.Text = "Rebirth: N/A"
+        Update3.Text = "Agility: N/A"
+        Update4.Text = "Durability: N/A"
+        Update5.Text = "Kills: N/A"
+        Update6.Text = "Muscle King Time: N/A"
+        Update9.Text = "Current Map: N/A"
+        Update10.Text = "Custom Size: N/A"
+        Update11.Text = "Custom Speed: N/A"
+        Update12.Text = "Evil Karma: N/A"
+        Update13.Text = "Good Karma: N/A"
+        enemyHealthLabel.Text = "Enemy life: N/A"
+        playerDamageLabel.Text = "Your damage: N/A"
+        hitsToKillLabel.Text = "Blows to kill him: N/A"
+        wildWizardLabel.Text = "Wild Wizard equipped: 0 (0 bonus)"
+        return
+    end
+
+    Update.Text = "Strength: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Strength") and FormatDisplay(targetPlayer.leaderstats.Strength.Value) or "N/A")
+    Update1.Text = "Gems: " .. (targetPlayer:FindFirstChild("Gems") and FormatDisplay(targetPlayer.Gems.Value) or "N/A")
+    Update2.Text = "Rebirth: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Rebirths") and FormatDisplay(targetPlayer.leaderstats.Rebirths.Value) or "N/A")
+    Update3.Text = "Agility: " .. (targetPlayer:FindFirstChild("Agility") and FormatDisplay(targetPlayer.Agility.Value) or "N/A")
+    Update4.Text = "Durability: " .. (targetPlayer:FindFirstChild("Durability") and FormatDisplay(targetPlayer.Durability.Value) or "N/A")
+    Update5.Text = "Kills: " .. (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Kills") and FormatDisplay(targetPlayer.leaderstats.Kills.Value) or "N/A")
+    Update6.Text = "Muscle King Time: " .. (targetPlayer:FindFirstChild("muscleKingTime") and FormatDisplay(targetPlayer.muscleKingTime.Value) or "N/A")
+    Update9.Text = "Current Map: " .. (targetPlayer:FindFirstChild("currentMap") and tostring(targetPlayer.currentMap.Value) or "N/A")
+    Update10.Text = "Custom Size: " .. (targetPlayer:FindFirstChild("customSize") and FormatDisplay(targetPlayer.customSize.Value) or "N/A")
+    Update11.Text = "Custom Speed: " .. (targetPlayer:FindFirstChild("customSpeed") and FormatDisplay(targetPlayer.customSpeed.Value) or "N/A")
+    Update12.Text = "Evil Karma: " .. (targetPlayer:FindFirstChild("evilKarma") and FormatDisplay(targetPlayer.evilKarma.Value) or "N/A")
+    Update13.Text = "Good Karma: " .. (targetPlayer:FindFirstChild("goodKarma") and FormatDisplay(targetPlayer.goodKarma.Value) or "N/A")
+
+    local enemyHealth = calculateEnemyHealth(targetPlayer)
+    local playerDamage = calculateLocalPlayerDamage()
+    local hitsToKill = calculateHitsToKill(enemyHealth, playerDamage)
+
+    enemyHealthLabel.Text = "Enemy life: " .. (enemyHealth > 0 and FormatDisplay(enemyHealth) or "N/A")
+    playerDamageLabel.Text = "Your damage: " .. (playerDamage > 0 and FormatDisplay(playerDamage) or "N/A")
+    hitsToKillLabel.Text = "Blows to kill him: " .. tostring(hitsToKill)
+end
+
+task.spawn(function()
+    while task.wait() do
+        local selectedPlayer = SelectPlayerName ~= "" and game.Players:FindFirstChild(SelectPlayerName)
+        updateStats(selectedPlayer)
+    end
+end)
 
 local Killer = window:AddTab("Kill")
 
