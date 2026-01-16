@@ -1061,8 +1061,8 @@ Killer:AddSwitch("Block touch Egg", function(Value)
 end)
 
 
-local antiKnockbackSwitch =
-    MainTab:AddSwitch(
+ local antiKnockbackSwitch =
+    killer:AddSwitch(
     "Anti Fling",
     function(bool)
         if bool then
@@ -1097,6 +1097,7 @@ antiKnockbackSwitch:Set(true)
 
 local lockRunning = false
 local lockConnection
+
 
 Killer:AddSwitch("Auto Kill", function(bool)
     autoKill = bool
